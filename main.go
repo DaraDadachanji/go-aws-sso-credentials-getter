@@ -24,7 +24,6 @@ func main() {
 	}
 	name := ParseProfileName(profileLine)
 	alias := GetAlias(name) //match against config file
-
 	//open and parse credentials
 	file, err := ReadCredentialsFile()
 	if err != nil {
@@ -35,12 +34,15 @@ func main() {
 	//modify profile
 	for _, line := range lines[1:] {
 		key, value := ParseKeyValue(line)
+		if credentials[alias] == nil {
+			credentials[alias] = Profile{}
+		}
 		credentials[alias][key] = value
 	}
 
 	//re-write credentials file
 	contents := credentials.Marshal()
-	err = ioutil.WriteFile("hello", contents, 0644)
+	err = ioutil.WriteFile(CredentialsFilepath(), contents, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -91,7 +93,7 @@ func ReadConfigFile() map[string]string {
 }
 
 func ReadCredentialsFile() ([]byte, error) {
-	credentialsFile := filepath.Join(HomeDirectory(), ".aws/credentials")
+	credentialsFile := CredentialsFilepath()
 	if !fileExists(credentialsFile) {
 		return nil, fmt.Errorf("file not found: %s", credentialsFile)
 	}
@@ -113,4 +115,8 @@ func fileExists(filename string) bool {
 func HomeDirectory() string {
 	u, _ := user.Current()
 	return u.HomeDir
+}
+
+func CredentialsFilepath() string {
+	return filepath.Join(HomeDirectory(), ".aws/credentials")
 }
