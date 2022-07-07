@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/user"
+	"path/filepath"
 
 	yaml "gopkg.in/yaml.v3"
 )
@@ -21,13 +23,22 @@ func main() {
 		log.Fatal("First line is not a profile tag")
 	}
 	name := ParseProfileName(profileLine)
-	profile = GetAlias(name)
+	alias := GetAlias(name) //match against config file
+
+	//open and parse credentials
 	file, err := ReadCredentialsFile()
 	if err != nil {
 		log.Fatalln(err)
 	}
 	credentials := Unmarshal(file)
 
+	//modify profile
+	for _, line := range lines[1:] {
+		key, value := ParseKeyValue(line)
+		credentials[alias][key] = value
+	}
+
+	//re-write credentials file
 	contents := credentials.Marshal()
 	err = ioutil.WriteFile("hello", contents, 0644)
 	if err != nil {
@@ -59,7 +70,7 @@ func ReadStdIn() []string {
 }
 
 func ReadConfigFile() map[string]string {
-	const configFile = "~/.aws/pcreds.yaml"
+	configFile := filepath.Join(HomeDirectory(), ".aws/pcreds.yaml")
 
 	if fileExists(configFile) {
 		data, err := os.ReadFile(configFile)
@@ -80,7 +91,7 @@ func ReadConfigFile() map[string]string {
 }
 
 func ReadCredentialsFile() ([]byte, error) {
-	credentialsFile := "~/.aws/credentials"
+	credentialsFile := filepath.Join(HomeDirectory(), ".aws/credentials")
 	if !fileExists(credentialsFile) {
 		return nil, fmt.Errorf("file not found: %s", credentialsFile)
 	}
@@ -97,4 +108,9 @@ func fileExists(filename string) bool {
 		return false
 	}
 	return true
+}
+
+func HomeDirectory() string {
+	u, _ := user.Current()
+	return u.HomeDir
 }
