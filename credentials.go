@@ -50,7 +50,7 @@ func Unmarshal(data []byte) Profiles {
 		key, value := ParseKeyValue(line)
 		profiles[profileName][key] = value
 	}
-	return Profiles{}
+	return profiles
 }
 
 func IsBlank(line string) bool {
