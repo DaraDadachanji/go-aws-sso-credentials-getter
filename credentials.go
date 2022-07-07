@@ -23,9 +23,9 @@ func (p *Profiles) Marshal() []byte {
 			line = fmt.Sprintf("%s = %s", key, value)
 			lines = append(lines, line)
 		}
+		lines = append(lines, "") //separate profiles with blank line
 	}
 	contents := []byte(strings.Join(lines, "\n"))
-	contents = append(contents, '\n') //trailing newline
 	return contents
 
 }
@@ -69,7 +69,7 @@ func ParseProfileName(line string) string {
 }
 
 func ParseKeyValue(line string) (key string, value string) {
-	r := regexp.MustCompile(`(?P<key>[^= ]*)[ ]*=[ ]*(?P<value>"[^" ]*"|[^," ]*)`)
+	r := regexp.MustCompile(`(?P<key>[^= ]*)[ ]*=[ ]*(?P<value>"[^" ]*"|[^," \n]*)`)
 	parts := r.FindStringSubmatch(line)
 	if len(parts) < 3 {
 		log.Panic("could not parse credentials file")
