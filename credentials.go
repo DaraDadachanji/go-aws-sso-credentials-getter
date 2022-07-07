@@ -33,8 +33,8 @@ func (p *Profiles) Marshal() []byte {
 func Unmarshal(data []byte) Profiles {
 	reader := bufio.NewReader(bytes.NewReader(data))
 	profiles := Profiles{}
+	var profileName string
 	for {
-		var profileName string
 		line, err := reader.ReadString('\n')
 		if err == io.EOF {
 			break
