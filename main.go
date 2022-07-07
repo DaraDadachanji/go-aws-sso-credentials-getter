@@ -8,12 +8,14 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"strings"
 
+	"github.com/atotto/clipboard"
 	yaml "gopkg.in/yaml.v3"
 )
 
 func main() {
-	lines := ReadStdIn()
+	lines := ReadClipboard()
 	if len(lines) != 4 {
 		log.Fatalln("expected 4 lines, recieved ", len(lines))
 	}
@@ -58,8 +60,9 @@ func GetAlias(name string) string {
 	return alias
 }
 
-func ReadStdIn() []string {
-	reader := bufio.NewReader(os.Stdin)
+func ReadClipboard() []string {
+	paste, _ := clipboard.ReadAll()
+	reader := bufio.NewReader(strings.NewReader(paste))
 	var lines []string
 	for {
 		line, readErr := reader.ReadString('\n')
