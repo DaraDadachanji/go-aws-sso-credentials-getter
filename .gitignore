@@ -1,0 +1,9 @@
+#artifacts
+pcreds
+
+#editor files
+.vscode
+.idea
+
+#mac files
+.DS_Store
