@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/user"
@@ -42,7 +41,7 @@ func main() {
 
 	//re-write credentials file
 	contents := credentials.Marshal()
-	err = ioutil.WriteFile(CredentialsFilepath(), contents, 0644)
+	err = os.WriteFile(CredentialsFilepath(), contents, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
