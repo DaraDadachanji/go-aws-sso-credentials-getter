@@ -1,11 +1,11 @@
 # Pcreds
 
-When logging into the commandline using single-sign-on, you typically need to
+When logging into the commandline using Control Tower, you typically need to
 click the copy button, open your credentials file, paste the contents
 in the appropriate location, and then potentially change the profile name.
 
-pcreds is a simple commandline utility to do all of these things
-with one alias-able command.
+pcreds is a simple commandline utility
+to do all of these things with one command.
 
 pcreds:
 
