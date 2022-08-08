@@ -22,6 +22,7 @@ clone this repository and build the executable. Then move it to your bin folder
 ```bash
 git clone https://github.com/DaraDadachanji/pcreds.git
 cd pcreds
+go mod tidy
 go build
 mv ./pcreds /usr/local/bin/pcreds
 ```
