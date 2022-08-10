@@ -22,11 +22,11 @@ func main() {
 		return
 	}
 
-	lines := ReadClipboard()
-	if len(lines) != 4 {
-		log.Fatalln("expected 4 lines, recieved ", len(lines))
+	clipboard := ReadClipboard()
+	if len(clipboard) != 4 {
+		log.Fatalln("expected 4 lines, recieved ", len(clipboard))
 	}
-	profileLine := lines[0]
+	profileLine := clipboard[0]
 	if !IsProfileName(profileLine) {
 		log.Fatal("First line is not a profile tag")
 	}
@@ -40,7 +40,7 @@ func main() {
 	credentials := Unmarshal(file)
 
 	//modify profile
-	for _, line := range lines[1:] {
+	for _, line := range clipboard[1:] {
 		key, value := ParseKeyValue(line)
 		if credentials[alias] == nil {
 			credentials[alias] = Profile{}
