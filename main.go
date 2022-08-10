@@ -14,7 +14,14 @@ import (
 	yaml "gopkg.in/yaml.v3"
 )
 
+const VERSION = "2.0.0"
+
 func main() {
+	halt := DoOptions()
+	if halt {
+		return
+	}
+
 	lines := ReadClipboard()
 	if len(lines) != 4 {
 		log.Fatalln("expected 4 lines, recieved ", len(lines))
