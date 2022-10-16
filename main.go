@@ -54,6 +54,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("updated:", alias)
 }
 
 func GetAlias(name string) string {
