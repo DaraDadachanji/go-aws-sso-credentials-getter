@@ -99,6 +99,7 @@ func ReadConfigFile() map[string]string {
 		}
 		return config.Profiles
 	}
+	log.Printf("pcreds.yaml not found at %s\n", configFile)
 	return nil
 }
 
