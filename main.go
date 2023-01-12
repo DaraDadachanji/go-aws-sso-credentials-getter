@@ -61,6 +61,7 @@ func GetAlias(name string) string {
 	aliases := ReadConfigFile()
 	var alias string
 	if aliases == nil {
+		log.Println("could not load profile aliases")
 		alias = "default"
 	} else {
 		alias = aliases[name]
