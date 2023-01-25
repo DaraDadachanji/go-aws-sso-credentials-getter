@@ -56,7 +56,10 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	newSection.SetBody(section.Body())
+	keys := []string{"aws_access_key_id", "aws_secret_access_key", "aws_session_token"}
+	for _, key := range keys {
+		newSection.NewKey(key, section.Key(key).Value())
+	}
 
 	//re-write credentials file
 	var buff bytes.Buffer
