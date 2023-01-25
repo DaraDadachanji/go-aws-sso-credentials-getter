@@ -35,7 +35,7 @@ func main() {
 	}
 	section := incoming.Sections()[1] // 0th section is DEFAULT
 	name := section.Name()
-	log.Println("recieved:", name)
+	fmt.Println("recieved profile:", name)
 	alias := GetAlias(name) //match against config file
 	//open and parse credentials
 	file, err := ReadCredentialsFile()

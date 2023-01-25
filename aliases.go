@@ -14,12 +14,14 @@ func GetAlias(name string) string {
 	alias, ok := config.Profiles[name]
 	if !ok {
 		fmt.Printf("could not find alias for profile: %s\n", name)
-		alias = config.PromptForAlias(name)
+		alias = PromptForAlias(name)
+		config.Profiles[name] = alias
+		config.Write()
 	}
 	return alias
 }
 
-func (c *Config) PromptForAlias(name string) string {
+func PromptForAlias(name string) string {
 	var userInput string
 	for {
 		fmt.Print("Please choose an alias for this profile: ")
