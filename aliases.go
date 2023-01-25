@@ -58,7 +58,7 @@ func ReadConfigFile() Config {
 		var config Config
 		err = yaml.Unmarshal(data, &config)
 		if err != nil {
-			return Config{Profiles: map[string]string{}}
+			log.Fatalln("could not parse config file: ", err)
 		}
 		return config
 	} else {
@@ -68,5 +68,5 @@ func ReadConfigFile() Config {
 }
 
 func ConfigFilepath() string {
-	return filepath.Join(HomeDirectory(), ".aws", "credentials")
+	return filepath.Join(HomeDirectory(), ".aws", "pcreds.yaml")
 }
