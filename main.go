@@ -14,7 +14,6 @@ import (
 
 	"github.com/atotto/clipboard"
 	"gopkg.in/ini.v1"
-	yaml "gopkg.in/yaml.v3"
 )
 
 const VERSION = "2.1.1"
@@ -76,18 +75,6 @@ func main() {
 	fmt.Println("updated:", alias)
 }
 
-func GetAlias(name string) string {
-	aliases := ReadConfigFile()
-	var alias string
-	if aliases == nil {
-		log.Println("could not load profile aliases")
-		alias = "default"
-	} else {
-		alias = aliases[name]
-	}
-	return alias
-}
-
 func ReadClipboard() []string {
 	paste, _ := clipboard.ReadAll()
 	reader := bufio.NewReader(strings.NewReader(paste))
@@ -99,28 +86,6 @@ func ReadClipboard() []string {
 			return lines
 		}
 	}
-}
-
-func ReadConfigFile() map[string]string {
-	configFile := filepath.Join(HomeDirectory(), ".aws/pcreds.yaml")
-
-	if fileExists(configFile) {
-		data, err := os.ReadFile(configFile)
-		if err != nil {
-			log.Fatalln("could not read config file: ", err)
-		}
-		type Config struct {
-			Profiles map[string]string `yaml:"profiles"`
-		}
-		var config Config
-		err = yaml.Unmarshal(data, &config)
-		if err != nil {
-			return nil
-		}
-		return config.Profiles
-	}
-	log.Printf("pcreds.yaml not found at %s\n", configFile)
-	return nil
 }
 
 func ReadCredentialsFile() ([]byte, error) {
@@ -149,5 +114,5 @@ func HomeDirectory() string {
 }
 
 func CredentialsFilepath() string {
-	return filepath.Join(HomeDirectory(), ".aws/credentials")
+	return filepath.Join(HomeDirectory(), ".aws", "/credentials")
 }
