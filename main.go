@@ -16,7 +16,7 @@ import (
 	"gopkg.in/ini.v1"
 )
 
-const VERSION = "2.1.1"
+const VERSION = "2.2.0"
 
 func main() {
 	halt := DoOptions()
