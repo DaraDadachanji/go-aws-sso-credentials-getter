@@ -11,7 +11,7 @@ func DoOptions() (halt bool) {
 	flag.Parse()
 	if *version {
 		halt = true
-		fmt.Println("version:", VERSION)
+		fmt.Println(VERSION)
 	}
 	return halt
 }
