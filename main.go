@@ -2,8 +2,10 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/user"
@@ -11,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/atotto/clipboard"
+	"gopkg.in/ini.v1"
 	yaml "gopkg.in/yaml.v3"
 )
 
@@ -22,37 +25,50 @@ func main() {
 		return
 	}
 
-	clipboard := ReadClipboard()
-	if len(clipboard) != 4 {
-		log.Fatalln("expected 4 lines, recieved ", len(clipboard))
+	paste, _ := clipboard.ReadAll()
+	incoming, err := ini.Load([]byte(paste))
+	if err != nil {
+		log.Println(err)
+		log.Fatalln("could not parse clipboard")
 	}
-	profileLine := clipboard[0]
-	if !IsProfileName(profileLine) {
-		log.Fatal("First line is not a profile tag")
-	}
-	name := ParseProfileName(profileLine)
+	section := incoming.Sections()[1] //first section is DEFAULT
+	name := section.Name()
+	log.Println("recieved:", name)
 	alias := GetAlias(name) //match against config file
 	//open and parse credentials
 	file, err := ReadCredentialsFile()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	credentials := Unmarshal(file)
-
-	//modify profile
-	for _, line := range clipboard[1:] {
-		key, value := ParseKeyValue(line)
-		if credentials[alias] == nil {
-			credentials[alias] = Profile{}
-		}
-		credentials[alias][key] = value
+	credentials, err := ini.Load(file)
+	if err != nil {
+		log.Println(err)
+		log.Fatalln("could not parse credentials file")
 	}
 
+	//modify profile
+	if credentials.HasSection(alias) {
+		credentials.DeleteSection(alias)
+	}
+	newSection, err := credentials.NewSection(alias)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	newSection.SetBody(section.Body())
+
 	//re-write credentials file
-	contents := credentials.Marshal()
+	var buff bytes.Buffer
+	_, err = credentials.WriteTo(&buff)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	contents, err := ioutil.ReadAll(&buff)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	err = os.WriteFile(CredentialsFilepath(), contents, 0644)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 	fmt.Println("updated:", alias)
 }
