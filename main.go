@@ -25,6 +25,7 @@ func main() {
 	}
 
 	paste, _ := clipboard.ReadAll()
+	_ = clipboard.WriteAll("") //clear clipboard
 	incoming, err := ini.Load([]byte(paste))
 	if err != nil {
 		log.Println(err)
