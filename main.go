@@ -32,7 +32,6 @@ func main() {
 		log.Fatalln("could not parse clipboard")
 	}
 	if len(incoming.Sections()) != 2 {
-		log.Printf("sections parsed: %d", incoming.Sections())
 		log.Fatalln("invalid credentials format")
 	}
 	section := incoming.Sections()[1] // 0th section is DEFAULT
