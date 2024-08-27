@@ -62,12 +62,29 @@ func ReadClipboard() []string {
 	reader := bufio.NewReader(strings.NewReader(paste))
 	var lines []string
 	for {
-		line, readErr := reader.ReadString('\n')
-		lines = append(lines, line)
+		var line []byte
+		var readErr error
+		isPrefix := true
+		for isPrefix {
+			var segment []byte
+			segment, isPrefix, readErr = reader.ReadLine()
+			line = append(line, segment...)
+		}
+		lines = append(lines, string(line))
 		if readErr == io.EOF {
-			return lines
+			return nonBlankLines(lines)
 		}
 	}
+}
+
+func nonBlankLines(lines []string) []string {
+	var newLines []string
+	for _, line := range lines {
+		if !IsBlank(line) {
+			newLines = append(newLines, line)
+		}
+	}
+	return newLines
 }
 
 func ReadCredentialsFile() ([]byte, error) {

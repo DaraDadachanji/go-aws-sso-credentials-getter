@@ -36,7 +36,11 @@ func PromptForAlias(name string) string {
 
 func (c *Config) Write() {
 	data, _ := yaml.Marshal(c)
-	err := os.WriteFile(ConfigFilepath(), data, 0644)
+	err := os.MkdirAll(ConfigFilepath(), 0644)
+	if err != nil {
+		log.Println("failed to create directory for credentials file", err)
+	}
+	err = os.WriteFile(ConfigFilepath(), data, 0644)
 	if err != nil {
 		log.Println("failed to write new config file", err)
 	}
