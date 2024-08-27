@@ -2,10 +2,8 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/user"
@@ -13,10 +11,9 @@ import (
 	"strings"
 
 	"github.com/atotto/clipboard"
-	"gopkg.in/ini.v1"
 )
 
-const VERSION = "3.0.2"
+const VERSION = "4.0.0"
 
 func main() {
 	halt := DoOptions()
@@ -24,57 +21,38 @@ func main() {
 		return
 	}
 
-	paste, _ := clipboard.ReadAll()
-	_ = clipboard.WriteAll("") //clear clipboard
-	incoming, err := ini.Load([]byte(paste))
-	if err != nil {
-		log.Println(err)
-		log.Fatalln("could not parse clipboard")
+	paste := ReadClipboard()
+	if len(paste) != 4 {
+		log.Fatalln("expected 4 lines, received ", len(paste))
 	}
-	if len(incoming.Sections()) != 2 {
-		log.Fatalln("invalid credentials format")
+	profileLine := paste[0]
+	if !IsProfileName(profileLine) {
+		log.Fatal("First line is not a profile tag")
 	}
-	section := incoming.Sections()[1] // 0th section is DEFAULT
-	name := section.Name()
-	fmt.Println("recieved profile:", name)
+	name := ParseProfileName(profileLine)
+	fmt.Println("received profile:", name)
 	alias := GetAlias(name) //match against config file
 	//open and parse credentials
 	file, err := ReadCredentialsFile()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	credentials, err := ini.Load(file)
-	if err != nil {
-		log.Println(err)
-		log.Fatalln("could not parse credentials file")
-	}
+	credentials := Unmarshal(file)
 
 	//modify profile
-	if credentials.HasSection(alias) {
-		credentials.DeleteSection(alias)
-	}
-	newSection, err := credentials.NewSection(alias)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	keys := []string{"aws_access_key_id", "aws_secret_access_key", "aws_session_token"}
-	for _, key := range keys {
-		newSection.NewKey(key, section.Key(key).Value())
+	for _, line := range paste[1:] {
+		key, value := ParseKeyValue(line)
+		if credentials[alias] == nil {
+			credentials[alias] = Profile{}
+		}
+		credentials[alias][key] = value
 	}
 
 	//re-write credentials file
-	var buff bytes.Buffer
-	_, err = credentials.WriteTo(&buff)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	contents, err := ioutil.ReadAll(&buff)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	contents := credentials.Marshal()
 	err = os.WriteFile(CredentialsFilepath(), contents, 0644)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
 	fmt.Println("updated:", alias)
 }
