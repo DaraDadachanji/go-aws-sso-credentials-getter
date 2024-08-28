@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/atotto/clipboard"
+	"github.com/antonmedv/clipboard"
 )
 
 const VERSION = "4.0.0"
