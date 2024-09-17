@@ -1,17 +1,12 @@
-# Pcreds
+# AWS SSO Credentials Getter
 
-When logging into the commandline using Control Tower, you typically need to
-click the copy button, open your credentials file, paste the contents
-in the appropriate location, and then potentially change the profile name.
+Tools like terraform are currently unable to handle AWS auth via SSO
+and rely on the access key and secret being in the credentials file.
 
-pcreds is a simple commandline utility
-to do all of these things with one command.
+SSOcred is a cli tool that will grab temporary AWS credentials from IAM Identity Center 
+and store them in ~/.aws/credentials
 
-pcreds:
-
-* Reads a credentials profile from the clipboard
-* Parses the profile name and looks up an alias in pcreds.yaml (stored in your .aws folder)
-* Parses your credentials file, updates the corresponding profile and saves an updated version
+This is a Golang fork of https://github.com/PredictMobile/aws-sso-credentials-getter
 
 ## Installation
 
@@ -19,19 +14,17 @@ Install Go from the [official website](https://go.dev/)
 
 clone this repository and build the executable. Then move it to your bin folder
 
-NOTE: if you are building for WSL you should include the `WSL_DISTRO_NAME` environment variable when building 
-
 ```bash
-git clone https://github.com/DaraDadachanji/pcreds.git
-cd pcreds
+git clone https://github.com/DaraDadachanji/go-aws-sso-credentials-getter.git
+cd go-aws-sso-credentials-getter
 go mod tidy
 go build
-mv ./go-aws-sso-credentials /usr/local/bin/sso-cred
+mv ./go-aws-sso-credentials-getter /usr/local/bin/ssocred
 ```
 
 ## Configuration
 
-You may create a pcreds.yaml file in `~/.aws` to store aliases for your profiles
+You should set up your profiles in your `~/.aws/config` file
 
 ```
 [profile my-profile]
@@ -56,4 +49,8 @@ This step is optional
 
 ## Usage
 
-simply run `sso-cred {profile}` in your terminal
+first login to identity center using `aws sso login --profile {{profile-alias}}`
+then run `ssocred {profile-alias}` in your terminal
+
+note that you only need to log into identity center once on any profile, 
+then you can run sso-cred on as many profiles as you want
