@@ -59,7 +59,7 @@ func IsBlank(line string) bool {
 }
 
 func IsProfileName(line string) bool {
-	match, _ := regexp.MatchString(`^\[[A-Za-z0-9\-_]+]`, line)
+	match, _ := regexp.MatchString(`^\[[ A-Za-z0-9\-_]+]`, line)
 	return match
 }
 
@@ -76,6 +76,7 @@ func ParseKeyValue(line string) (key string, value string) {
 	r := regexp.MustCompile(`([^= ]*)\s*=\s*(\S*)`)
 	parts := r.FindStringSubmatch(line)
 	if len(parts) < 3 {
+		log.Println(line)
 		log.Panic("could not parse credentials file")
 	}
 	return parts[1], parts[2]

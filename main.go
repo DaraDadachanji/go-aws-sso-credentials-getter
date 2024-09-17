@@ -1,16 +1,11 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"os/user"
 	"path/filepath"
-	"strings"
-
-	"github.com/antonmedv/clipboard"
 )
 
 const VERSION = "4.0.0"
@@ -20,18 +15,12 @@ func main() {
 	if halt {
 		return
 	}
+	log.SetFlags(log.Llongfile)
+	if len(os.Args) < 2 {
+		fmt.Println("missing argument: profile-alias")
+	}
+	alias := os.Args[1]
 
-	paste := ReadClipboard()
-	if len(paste) != 4 {
-		log.Fatalln("expected 4 lines, received ", len(paste))
-	}
-	profileLine := paste[0]
-	if !IsProfileName(profileLine) {
-		log.Fatal("First line is not a profile tag")
-	}
-	name := ParseProfileName(profileLine)
-	fmt.Println("received profile:", name)
-	alias := GetAlias(name) //match against config file
 	//open and parse credentials
 	file, err := ReadCredentialsFile()
 	if err != nil {
@@ -39,14 +28,9 @@ func main() {
 	}
 	credentials := Unmarshal(file)
 
+	profile := GetCredentials(alias)
 	//modify profile
-	for _, line := range paste[1:] {
-		key, value := ParseKeyValue(line)
-		if credentials[alias] == nil {
-			credentials[alias] = Profile{}
-		}
-		credentials[alias][key] = value
-	}
+	credentials[alias] = profile
 
 	//re-write credentials file
 	contents := credentials.Marshal()
@@ -55,26 +39,6 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println("updated:", alias)
-}
-
-func ReadClipboard() []string {
-	paste, _ := clipboard.ReadAll()
-	reader := bufio.NewReader(strings.NewReader(paste))
-	var lines []string
-	for {
-		var line []byte
-		var readErr error
-		isPrefix := true
-		for isPrefix {
-			var segment []byte
-			segment, isPrefix, readErr = reader.ReadLine()
-			line = append(line, segment...)
-		}
-		lines = append(lines, string(line))
-		if readErr == io.EOF {
-			return nonBlankLines(lines)
-		}
-	}
 }
 
 func nonBlankLines(lines []string) []string {
@@ -113,5 +77,5 @@ func HomeDirectory() string {
 }
 
 func CredentialsFilepath() string {
-	return filepath.Join(HomeDirectory(), ".aws", "/credentials")
+	return filepath.Join(HomeDirectory(), ".aws", "credentials")
 }

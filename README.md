@@ -19,6 +19,8 @@ Install Go from the [official website](https://go.dev/)
 
 clone this repository and build the executable. Then move it to your bin folder
 
+NOTE: if you are building for WSL you should include the `WSL_DISTRO_NAME` environment variable when building 
+
 ```bash
 git clone https://github.com/DaraDadachanji/pcreds.git
 cd pcreds
