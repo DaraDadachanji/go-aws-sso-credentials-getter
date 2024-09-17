@@ -1,5 +1,5 @@
 #artifacts
-pcreds
+go-aws-sso-credentials
 
 #editor files
 .vscode
