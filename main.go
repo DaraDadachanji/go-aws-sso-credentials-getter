@@ -16,10 +16,18 @@ func main() {
 		return
 	}
 	log.SetFlags(log.Llongfile)
+	var alias string
 	if len(os.Args) < 2 {
-		fmt.Println("missing argument: profile-alias")
+		profile := os.Getenv("AWS_PROFILE")
+		if profile != "" {
+			alias = profile
+		} else {
+			fmt.Println("missing argument: profile-alias")
+			return
+		}
+	} else {
+		alias = os.Args[1]
 	}
-	alias := os.Args[1]
 
 	//open and parse credentials
 	file, err := ReadCredentialsFile()

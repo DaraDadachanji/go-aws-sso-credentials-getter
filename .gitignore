@@ -7,3 +7,7 @@ go-aws-sso-credentials-getter
 
 #mac files
 .DS_Store
+
+#build
+ssocred*
+build.sh

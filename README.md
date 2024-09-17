@@ -6,7 +6,10 @@ and rely on the access key and secret being in the credentials file.
 SSOcred is a cli tool that will grab temporary AWS credentials from IAM Identity Center 
 and store them in ~/.aws/credentials
 
-This is a Golang fork of https://github.com/PredictMobile/aws-sso-credentials-getter
+This is mostly a Golang fork of https://github.com/PredictMobile/aws-sso-credentials-getter with a few changes
+
+Notably, if you do not provide a profile argument but have your AWS_PROFILE environment variable set,
+it will use that profile
 
 ## Installation
 
