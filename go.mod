@@ -1,4 +1,4 @@
-module github.com/DaraDadachanji/go-aws-sso-credentials
+module github.com/DaraDadachanji/go-aws-sso-credentials-getter
 
 go 1.21
 
