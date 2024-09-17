@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -80,4 +81,8 @@ func ParseKeyValue(line string) (key string, value string) {
 		log.Panic("could not parse credentials file")
 	}
 	return parts[1], parts[2]
+}
+
+func CredentialsFilepath() string {
+	return filepath.Join(HomeDirectory(), ".aws", "credentials")
 }

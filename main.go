@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/user"
-	"path/filepath"
 )
 
 const VERSION = "4.0.0"
@@ -28,7 +28,15 @@ func main() {
 	}
 	credentials := Unmarshal(file)
 
-	profile := GetCredentials(alias)
+	profile, err := GetCredentials(alias)
+	if err == io.EOF {
+		fmt.Println("no active session. Please login using aws sso login --profile {{profile}}")
+		return
+	}
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	//modify profile
 	credentials[alias] = profile
 
@@ -74,8 +82,4 @@ func fileExists(filename string) bool {
 func HomeDirectory() string {
 	u, _ := user.Current()
 	return u.HomeDir
-}
-
-func CredentialsFilepath() string {
-	return filepath.Join(HomeDirectory(), ".aws", "credentials")
 }

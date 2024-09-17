@@ -6,16 +6,18 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sso"
+	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 )
 
-func GetCredentials(alias string) Profile {
+func GetCredentials(alias string) (Profile, error) {
 	accessToken, err := getAccessToken()
 	if err != nil {
-		log.Panic(err)
+		return nil, err
 	}
 	profileInfo := getProfile(alias)
 	sess := sso.NewFromConfig(aws.Config{Region: "us-east-1"})
@@ -25,7 +27,7 @@ func GetCredentials(alias string) Profile {
 		RoleName:    &profileInfo.RoleName,
 	})
 	if err != nil {
-		log.Panic(err)
+		return nil, err
 	}
 	profile := Profile{
 		"aws_access_key_id":     *output.RoleCredentials.AccessKeyId,
@@ -33,7 +35,7 @@ func GetCredentials(alias string) Profile {
 		"aws_session_token":     *output.RoleCredentials.SessionToken,
 		"expiration":            strconv.FormatInt(output.RoleCredentials.Expiration, 10),
 	}
-	return profile
+	return profile, nil
 }
 
 type CacheContents struct {
@@ -42,8 +44,7 @@ type CacheContents struct {
 }
 
 func getAccessToken() (string, error) {
-	home, _ := os.UserHomeDir()
-	cacheDir := home + "/.aws/sso/cache/"
+	cacheDir := filepath.Join(HomeDirectory(), ".aws", "sso", "cache")
 	files, err := os.ReadDir(cacheDir)
 	if err != nil {
 		log.Println(err)
@@ -51,12 +52,13 @@ func getAccessToken() (string, error) {
 	}
 	for _, file := range files {
 		var contents CacheContents
-		data, _ := os.ReadFile(cacheDir + file.Name())
+		data, _ := os.ReadFile(filepath.Join(cacheDir, file.Name()))
 		if err != nil {
 			log.Println(err)
 		}
 		err := json.Unmarshal(data, &contents)
 		if err != nil {
+
 			log.Println(err)
 		}
 		if contents.AccessToken != "" && contents.ExpiresAt != "" {
@@ -66,12 +68,11 @@ func getAccessToken() (string, error) {
 			}
 			if expiration.After(time.Now()) {
 				return contents.AccessToken, nil
-			} else {
-				fmt.Println("expired")
 			}
 		}
 	}
-	return "", fmt.Errorf("could not find active session")
+	fmt.Println("could not find active session")
+	return "", io.EOF
 }
 
 type ProfileInfo struct {
@@ -80,8 +81,7 @@ type ProfileInfo struct {
 }
 
 func getProfile(alias string) ProfileInfo {
-	home, _ := os.UserHomeDir()
-	configPath := home + "/.aws/config"
+	configPath := filepath.Join(HomeDirectory(), ".aws", "config")
 	data, err := os.ReadFile(configPath)
 	if err != nil {
 		log.Println("cannot read config file")
